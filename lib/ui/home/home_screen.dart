@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:news/model/category_model.dart';
 import 'package:news/ui/home/category/category_details.dart';
 import 'package:news/ui/home/category/category_fragment.dart';
+import 'package:news/ui/home/custom_search.dart';
 import 'package:news/ui/home/drawer/home_drawer.dart';
 import 'package:news/utils/app_colors.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String routeName = 'home_screen';
@@ -25,6 +26,15 @@ class _HomeScreenState extends State<HomeScreen> {
               : selectedCategory!.title,
           style: theme.textTheme.headlineLarge,
         ),
+        actions: [
+          selectedCategory == null
+              ? SizedBox()
+              : IconButton(
+                  onPressed: () {
+                    showSearch(context: context, delegate: CustomSearch());
+                  },
+                  icon: Icon(Icons.search))
+        ],
       ),
       drawer: Drawer(
         backgroundColor: AppColors.blackColor,

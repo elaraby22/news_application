@@ -16,5 +16,7 @@
 "technology" : "Technology",
 "entertainment" : "Entertainment",
 "health" : "Health",
-"science" : "Science"
+"science" : "Science",
+"try_again" : "Try Again",
+"something_went_wrong" : "Something Went Wrong"
 }

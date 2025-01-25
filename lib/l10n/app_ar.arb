@@ -16,5 +16,7 @@
 "technology" : "تكنولوجيا",
 "entertainment" : "ترفيه",
 "health" : "صحة",
-"science" : "علوم"
+"science" : "علوم",
+"try_again" : "حاول مرة اخرى",
+"something_went_wrong" : "حدث خطأ ما"
 }
