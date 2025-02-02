@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:news/api/api_manager.dart';
-import 'package:news/model/NewsResponse.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news/di/di.dart';
 import 'package:news/model/SourceResponse.dart';
+import 'package:news/ui/home/news/cubit/news_view_model.dart';
 import 'package:news/ui/home/news/news_item.dart';
 import 'package:news/utils/app_colors.dart';
+import 'cubit/news_states.dart';
 
 class NewsWidget extends StatefulWidget {
   Source source;
@@ -15,68 +17,99 @@ class NewsWidget extends StatefulWidget {
 }
 
 class _NewsWidgetState extends State<NewsWidget> {
+  NewsViewModel viewModel =
+      NewsViewModel(newsRepository: injectNewsRepository());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    viewModel.getNewsBySourceId(widget.source.id ?? '');
+  }
+
   @override
   Widget build(BuildContext context) {
+    viewModel.getNewsBySourceId(widget.source.id ?? '');
     var theme = Theme.of(context);
-    return FutureBuilder<NewsResponse?>(
-        future: ApiManager.getNewsBySourceId(widget.source.id ?? ''),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.greyColor,
-              ),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                children: [
-                  Text(
-                    'Something Went Wrong',
-                    style: theme.textTheme.headlineLarge,
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        ApiManager.getNewsBySourceId(widget.source.id ?? '');
-                        setState(() {});
-                      },
-                      child: Text(
-                        'Try Again',
-                        style: theme.textTheme.headlineLarge,
-                      ))
-                ],
-              ),
-            );
-          }
-          // server => response
-          if (snapshot.data!.status != 'ok') {
-            return Center(
-              child: Column(
-                children: [
-                  Text(
-                    snapshot.data!.message!,
-                    style: theme.textTheme.headlineLarge,
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        ApiManager.getNewsBySourceId(widget.source.id ?? '');
-                        setState(() {});
-                      },
-                      child: Text(
-                        'Try Again',
-                        style: theme.textTheme.headlineLarge,
-                      ))
-                ],
-              ),
-            );
-          }
-          var newsList = snapshot.data!.articles!;
-          return ListView.builder(
-            itemBuilder: (context, index) {
-              return NewsItem(news: newsList[index]);
-            },
-            itemCount: newsList.length,
-          );
-        });
+    var height = MediaQuery.of(context).size.height;
+    return Column(
+      children: [
+        BlocProvider(
+          create: (context) => viewModel,
+          child: BlocBuilder<NewsViewModel, NewsState>(
+              buildWhen: (previous, current) => current is! NewsFromPagination,
+              builder: (context, state) {
+                if (state is NewsErrorState) {
+                  return Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          state.errorMessage,
+                          style: theme.textTheme.headlineLarge,
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              viewModel
+                                  .getNewsBySourceId(widget.source.id ?? '');
+                            },
+                            child: Text(
+                              'Try Again',
+                              style: theme.textTheme.headlineLarge,
+                            ))
+                      ],
+                    ),
+                  );
+                } else if (state is NewsSuccessState) {
+                  return NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification.metrics.pixels ==
+                              notification.metrics.maxScrollExtent &&
+                          notification is ScrollUpdateNotification) {
+                        viewModel.getNewsBySourceId(widget.source.id ?? '',
+                            fromLoading: true);
+                      }
+                      return true;
+                    },
+                    child: Expanded(
+                      child: ListView.builder(
+                        itemBuilder: (context, index) {
+                          return NewsItem(news: viewModel.newsList![index]);
+                        },
+                        itemCount: viewModel.newsList!.length,
+                      ),
+                    ),
+                  );
+                } else {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.greyColor,
+                    ),
+                  );
+                }
+              }),
+        ),
+        SizedBox(
+          height: height * 0.02,
+        ),
+        BlocProvider(
+          create: (context) => viewModel,
+          child:
+              BlocBuilder<NewsViewModel, NewsState>(builder: (context, state) {
+            if (state is NewsFromPagination) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.greyColor,
+                ),
+              );
+            } else {
+              return SizedBox.shrink();
+            }
+          }),
+        ),
+        SizedBox(
+          height: height * 0.02,
+        )
+      ],
+    );
   }
 }

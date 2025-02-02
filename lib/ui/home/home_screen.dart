@@ -3,8 +3,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:news/model/category_model.dart';
 import 'package:news/ui/home/category/category_details.dart';
 import 'package:news/ui/home/category/category_fragment.dart';
-import 'package:news/ui/home/custom_search.dart';
 import 'package:news/ui/home/drawer/home_drawer.dart';
+import 'package:news/ui/home/news/search_news_screen.dart';
 import 'package:news/utils/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,16 +24,14 @@ class _HomeScreenState extends State<HomeScreen> {
           selectedCategory == null
               ? AppLocalizations.of(context)!.home
               : selectedCategory!.title,
-          style: theme.textTheme.headlineLarge,
+          style: Theme.of(context).textTheme.headlineLarge,
         ),
         actions: [
-          selectedCategory == null
-              ? SizedBox()
-              : IconButton(
-                  onPressed: () {
-                    showSearch(context: context, delegate: CustomSearch());
-                  },
-                  icon: Icon(Icons.search))
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(SearchNewsScreen.routeName);
+              },
+              icon: Icon(Icons.search))
         ],
       ),
       drawer: Drawer(

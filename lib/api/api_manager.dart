@@ -10,7 +10,7 @@ class ApiManager {
   /*
   https://newsapi.org/v2/top-headlines/sources?apiKey=ca769b04eed9485e82aedaf7aec67fa0
    */
-  static Future<SourceResponse?> getSources(String categoryId) async {
+  Future<SourceResponse?> getSources(String categoryId) async {
     Uri url = Uri.https(ApiConstants.baseUrl, EndPoints.sourceApi,
         {'apiKey': ApiConstants.apiKey, 'category': categoryId});
     // String => json => object
@@ -29,12 +29,29 @@ class ApiManager {
   https://newsapi.org/v2/everything?q=bitcoin&apiKey=ca769b04eed9485e82aedaf7aec67fa0
    */
 
-  static Future<NewsResponse?> getNewsBySourceId(String sourceId) async {
+  Future<NewsResponse?> getNewsBySourceId(String sourceId,
+      String pageSize) async {
     Uri url = Uri.https(ApiConstants.baseUrl, EndPoints.newsApi, {
       'apiKey': ApiConstants.apiKey,
       'sources': sourceId,
-      'pageSize': '10',
-      'page': '1'
+      'pageSize': pageSize
+    });
+    try {
+      var response = await http.get(url);
+      var responseBody = response.body;
+      var json = jsonDecode(responseBody);
+      return NewsResponse.fromJson(json);
+      // NewsResponse.fromJson(jsonDecode(response.body));
+    } catch (e) {
+      throw e;
+    }
+  }
+
+
+  static Future<NewsResponse?> searchNews(String search) async {
+    Uri url = Uri.https(ApiConstants.baseUrl, EndPoints.newsApi, {
+      'apiKey': ApiConstants.apiKey,
+      'q': search
     });
     try {
       var response = await http.get(url);

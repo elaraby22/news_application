@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:news/provider/app_language_provider.dart';
 import 'package:news/provider/app_theme_provider.dart';
 import 'package:news/ui/home/home_screen.dart';
+import 'package:news/ui/home/news/search_news_screen.dart';
 import 'package:news/utils/app_theme.dart';
 import 'package:news/utils/my_bloc_observer.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: HomeScreen.routeName,
-      routes: {HomeScreen.routeName: (context) => HomeScreen()},
+      routes: {
+        HomeScreen.routeName: (context) => HomeScreen(),
+        SearchNewsScreen.routeName: (context) => SearchNewsScreen()
+      },
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.appTheme,
